@@ -5,7 +5,17 @@ import java.util.ArrayList;
 public class PackGrowing {
 	
 	private Node root;
+	private Integer padding = 0;
 
+	/*
+	 * Sets free space padding to be created around each packed node
+	 * 
+	 * @param	padding	padding in pixels
+	 */
+	public void setPadding( Integer p ){
+		padding = p;
+	}
+	
 	/*
 	 * Adds Node node property to each element in an array of ImageNodes according to how it could be packed into a larger rectangle
 	 * 
@@ -16,7 +26,7 @@ public class PackGrowing {
 		int w = images.get(0).w;
 		int h = images.get(0).h;
 		
-		root = new Node( 0, 0, w, h );
+		root = new Node( padding, padding, w, h );
 		
 		for( ImageNode imageNode: images){
 			Node availableNode = findNode( root, imageNode.w, imageNode.h );
@@ -27,6 +37,9 @@ public class PackGrowing {
 				imageNode.node = growNode( imageNode.w, imageNode.h );
 			}
 		}
+		
+		root.w = root.w + padding * 2;
+		root.h = root.h + padding * 2;
 		
 		return root;
 	}
@@ -51,11 +64,11 @@ public class PackGrowing {
 		}
 	}
 	
-	// Split a node into smaller nodes
+	// Split a node into a node of size w x h and return the remaining space to the pool
 	private Node splitNode( Node nodeIn, int w, int h ){
 		nodeIn.used = true;
-		nodeIn.down = new Node( nodeIn.x, nodeIn.y + h, nodeIn.w, nodeIn.h - h );
-		nodeIn.right = new Node( nodeIn.x + w, nodeIn.y, nodeIn.w - w, h );
+		nodeIn.down = new Node( nodeIn.x, nodeIn.y + h + padding, nodeIn.w, nodeIn.h - h - padding );
+		nodeIn.right = new Node( nodeIn.x + w + padding, nodeIn.y, nodeIn.w - w - padding, h );
 		return nodeIn;
 	}
 	
@@ -86,10 +99,11 @@ public class PackGrowing {
 	
 	// Grow right
 	private Node growRight( int w, int h ) {
-		Node newRoot = new Node( 0, 0, root.w + w, root.h );
+		// TODO: foobar!
+		Node newRoot = new Node( root.x, root.y, root.w + w + padding, root.h );
 		newRoot.used = true;
 		newRoot.down = root;
-		newRoot.right = new Node( root.w, 0, w, root.h );
+		newRoot.right = new Node( root.w + root.x + padding, root.y, w, root.h );
 		root = newRoot;
 
 		Node availableNode = findNode( root, w, h );
@@ -103,9 +117,10 @@ public class PackGrowing {
 	
 	// Grow down
 	private Node growDown( int w, int h ) {
-		Node newRoot = new Node( 0, 0, root.w, root.h + h );
+		// TODO: foobar!
+		Node newRoot = new Node( root.x, root.y, root.w, root.h + h + padding );
 		newRoot.used = true;
-		newRoot.down = new Node( 0, root.h, root.w, h );
+		newRoot.down = new Node( root.x, root.y + root.h + padding, root.w, h );
 		newRoot.right = root;
 		root = newRoot;
 
@@ -119,24 +134,3 @@ public class PackGrowing {
 	}
 	
 }
-
-/*
-
-growDown: function(w, h) {
-this.root = {
-  used: true,
-  x: 0,
-  y: 0,
-  w: this.root.w,
-  h: this.root.h + h,
-  down:  { x: 0, y: this.root.h, w: this.root.w, h: h },
-  right: this.root
-};
-if (node = this.findNode(this.root, w, h))
-  return this.splitNode(node, w, h);
-else
-  return null;
-}
-
-
-*/

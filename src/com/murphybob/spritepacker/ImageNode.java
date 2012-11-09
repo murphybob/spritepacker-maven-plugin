@@ -7,14 +7,14 @@ import java.io.IOException;
 import javax.imageio.ImageIO;
 
 public class ImageNode {
-	public File filename;
+	public File file;
 	public BufferedImage image;
 	public Node node;
 	public int w;
 	public int h;
 	
 	public ImageNode( File f ){
-		filename = f;
+		file = f;
 		try {
 			image = ImageIO.read(f);
 		} catch (IOException e) {
@@ -25,7 +25,7 @@ public class ImageNode {
 	}
 	
 	public String toString(){
-		return filename.getPath() + "\n" + node;
+		return file.getPath() + "\n" + node;
 	}
 
 }

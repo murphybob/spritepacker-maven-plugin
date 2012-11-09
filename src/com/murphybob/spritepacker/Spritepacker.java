@@ -1,14 +1,22 @@
 package com.murphybob.spritepacker;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Map;
 import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
+
+import org.codehaus.jackson.JsonGenerationException;
+import org.codehaus.jackson.map.JsonMappingException;
+import org.codehaus.jackson.map.ObjectMapper;
+import org.codehaus.jackson.map.SerializationConfig.Feature;
 
 public class Spritepacker {
 	
@@ -18,167 +26,13 @@ public class Spritepacker {
 	 * These will come from pom when mojo'd
 	 */
 	private static File output = new File("target/spritesheet.png");
+	private static File json = new File("target/spritesheet.jsonp");
+	private static String jsonp_variable = "S";
 	private static File[] imageFiles = {
 		new File("src/images/bob.png"),
 		new File("src/images/html5.png"),
 		new File("src/images/twitterTall.png"),
 		new File("src/images/twitter.png"),
-		new File("src/images/superman.png"),
-		new File("src/images/bob.png"),
-		new File("src/images/twitterTall.png"),
-		new File("src/images/twitter.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/twsmall.png"),
 		new File("src/images/twsmall.png"),
 		new File("src/images/superman.png")
 	};
@@ -211,6 +65,11 @@ public class Spritepacker {
 		// Put to a spritesheet and write to a file
 		saveSpritesheet( images, root, output );
 		
+		log("Saving JSON...");
+		
+		// Write json(p) data with image coords and dimensions to a file
+		saveJSON( images, json, jsonp_variable );
+				
 		float took = secondsSinceStart();
 		log("Done - took " + took + "s!");
 
@@ -259,6 +118,65 @@ public class Spritepacker {
 			log("Couldn't write spritesheet: "+output, e);
 		}
 		
+	}
+	
+	private static void saveJSON( ArrayList<ImageNode> images, File json, String jsonp_variable ){
+		ObjectMapper mapper = new ObjectMapper();
+		mapper.configure( Feature.INDENT_OUTPUT, true);
+		
+		Map<String,Object> map = new HashMap<String,Object>();
+		for( ImageNode n : images ){
+			
+			Map<String,Object> props = new HashMap<String,Object>();
+			props.put("x", "-" + n.node.x + "px");
+			props.put("y", "-" + n.node.y + "px");
+			props.put("w", "" + n.w + "px");
+			props.put("h", "" + n.h + "px");
+			props.put("xy", "-" + n.node.x + "px -" + n.node.y + "px");
+			
+			Map<String,Integer> numbers = new HashMap<String,Integer>();
+			numbers.put("x", n.node.x);
+			numbers.put("y", n.node.y);
+			numbers.put("w", n.w);
+			numbers.put("h", n.h);
+			
+			props.put("n", numbers);
+			
+			map.put( fnWithoutExtension(n.file), props);
+		}
+		
+		// Generate json representation of map object
+		String out = "";
+		try {
+			out = mapper.writeValueAsString( map );
+		} catch (Exception e) {
+			log("Couldn't generate JSON data", e);
+		}
+		
+		// If user has passed in a variable to wrap this in, append it to the front
+		if( jsonp_variable != null ){
+			out = jsonp_variable + " = " + out;
+		}
+		
+		// Write it to the designated output file
+		try {
+			FileWriter fw = new FileWriter( json );
+			fw.write( out );
+			fw.close();
+		} catch (IOException e) {
+			log("Couldn't write JSON: "+json, e);
+		}
+	}
+	
+	private static String fnWithoutExtension( File file ){
+		String fn = file.getName();
+		String[] parts = fn.split("\\.(?=[^\\.]+$)");
+		if( parts.length > 0 ){
+			return parts[0];
+		}
+		else{
+			return fn;
+		}
 	}
 	
 	static float secondsSinceStart(){

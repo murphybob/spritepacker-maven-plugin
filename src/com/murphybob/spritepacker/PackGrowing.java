@@ -99,7 +99,6 @@ public class PackGrowing {
 	
 	// Grow right
 	private Node growRight( int w, int h ) {
-		// TODO: foobar!
 		Node newRoot = new Node( root.x, root.y, root.w + w + padding, root.h );
 		newRoot.used = true;
 		newRoot.down = root;
@@ -117,7 +116,6 @@ public class PackGrowing {
 	
 	// Grow down
 	private Node growDown( int w, int h ) {
-		// TODO: foobar!
 		Node newRoot = new Node( root.x, root.y, root.w, root.h + h + padding );
 		newRoot.used = true;
 		newRoot.down = new Node( root.x, root.y + root.h + padding, root.w, h );

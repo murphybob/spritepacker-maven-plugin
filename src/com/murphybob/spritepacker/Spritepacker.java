@@ -3,7 +3,6 @@ package com.murphybob.spritepacker;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -13,69 +12,175 @@ import java.awt.Graphics2D;
 import java.awt.image.BufferedImage;
 import javax.imageio.ImageIO;
 
-import org.codehaus.jackson.JsonGenerationException;
-import org.codehaus.jackson.map.JsonMappingException;
 import org.codehaus.jackson.map.ObjectMapper;
 import org.codehaus.jackson.map.SerializationConfig.Feature;
 
-public class Spritepacker {
+import org.codehaus.plexus.util.Scanner;
+import org.sonatype.plexus.build.incremental.BuildContext;
+
+import org.apache.maven.plugin.AbstractMojo;
+import org.apache.maven.plugin.MojoExecutionException;
+
+
+/**
+ * Packs spritesheets from supplied images.
+ * 
+ * @author Robert Murphy
+ * @goal compile
+ * @phase process-sources
+ */
+public class Spritepacker extends AbstractMojo {
 	
 	private static long startTime = System.currentTimeMillis();
 	
-	/*
-	 * These will come from pom when mojo'd
+	/**
+	 * Output spritesheet image name
+	 * 
+	 * @parameter expression="${spritepacker.output}"
+	 * @required
 	 */
-	private static File output = new File("target/spritesheet.png");
-	private static File json = new File("target/spritesheet.jsonp");
-	private static String jsonp_variable = "S";
-	private static File[] imageFiles = {
-		new File("src/images/bob.png"),
-		new File("src/images/html5.png"),
-		new File("src/images/twitterTall.png"),
-		new File("src/images/twitter.png"),
-		new File("src/images/twsmall.png"),
-		new File("src/images/superman.png")
-	};
-	private static Integer padding = 50;
+	private static File output;
 	
 	/**
-	 * @param args
+	 * Output json(p) description file containing coords and dimensions.
+	 * 
+	 * @parameter expression="${spritepacker.json}"
 	 */
-	public static void main(String[] args) {
-		
-		log("Started Spritepacker.");
-		
-		log("Loading " + imageFiles.length + " images...");
-		
-		// Load images defined in input array
-		ArrayList<ImageNode> images = loadImages( imageFiles );
+	private static File json;
+	
+	/**
+	 * Optional padding variable for jsonp files
+	 * e.g.
+	 * { image: {...} }
+	 * becomes
+	 * jsonpVar = { image: {...} }
+	 * 
+	 * @parameter expression="${spritepacker.jsonpVar}"
+	 */
+	private static String jsonpVar;
+	
+	/**
+	 * The source directory containing the LESS sources.
+	 * 
+	 * @parameter expression="${spritepacker.sourceDirectory}"
+	 * @required
+	 */
+	private File sourceDirectory;
 
-		log("Sorting images...");
+	/**
+	 * List of files to include. Specified as fileset patterns which are relative to the source directory. Default is all files.
+	 * 
+	 * @parameter
+	 */
+	private String[] includes = new String[]{ "**/*" };
+
+	/**
+	 * List of files to exclude. Specified as fileset patterns which are relative to the source directory.
+	 * 
+	 * @parameter
+	 */
+	private String[] excludes = new String[] {};
+	
+	/**
+	 * Optional transparent padding added between images in spritesheet.
+	 * 
+	 * @parameter expression="${spritepacker.padding}" default-value="0"
+	 */
+	private static Integer padding;
+
+	/** @component */
+	private BuildContext buildContext;
+
+	/**
+	 * Execute the MOJO.
+	 * 
+	 * @throws MojoExecutionException
+	 *             if something unexpected occurs.
+	 */
+	public void execute() throws MojoExecutionException {
 		
-		// Sort images to be largest (by max(width,height)) first
-		sortImages( images );		
+		// Load input files into an ArrayList
+		ArrayList<File> inputs = toFileArray( sourceDirectory, includes, excludes );
 		
-		log("Packing images...");
+		// Check if there are actually any inputs to do anything with
+		if( inputs.size() == 0 ){
+			log("No source images found.");
+		}
+		else{
+						
+			// Load output files into an ArrayList
+			ArrayList<File> outputs = new ArrayList<File>();
+			outputs.add( output );
+			outputs.add( json );
+			
+			// Check if anything on the input side has been modified more recently than anything on the output side
+			if( getLastModified( inputs ) < getLastModified( outputs) ){
+				log("No source images modified.");
+			}
+			else{
+			
+				log("Loading " + inputs.size() + " images...");
+				
+				// Load images defined in input array
+				ArrayList<ImageNode> images = loadImages( inputs );
 		
-		// Add packing information
-		Node root = packImages( images );
+				log("Sorting images...");
+				
+				// Sort images to be largest (by max(width,height)) first
+				sortImages( images );		
+				
+				log("Packing images...");
+				
+				// Add packing information
+				Node root = packImages( images, padding );
+				
+				log("Saving spritesheet...");
+				
+				// Put to a spritesheet and write to a file
+				saveSpritesheet( images, root, output );
+				
+				if( json != null ){
 		
-		log("Saving spritesheet...");
-		
-		// Put to a spritesheet and write to a file
-		saveSpritesheet( images, root, output );
-		
-		log("Saving JSON...");
-		
-		// Write json(p) data with image coords and dimensions to a file
-		saveJSON( images, json, jsonp_variable );
+					log("Saving JSON...");
+				
+					// Write json(p) data with image coords and dimensions to a file
+					saveJSON( images, json, jsonpVar );
+					
+				}
+				
+			}
+			
+		}
 				
 		float took = secondsSinceStart();
 		log("Done - took " + took + "s!");
 
 	}
 	
-	private static ArrayList<ImageNode> loadImages( File[] imageFiles ){
+	private long getLastModified( ArrayList<File> files ){
+		long modified = 0;
+		for( File f : files ){
+			if( f != null ){
+				modified = Math.max( modified, f.lastModified() );
+			}
+		}
+		return modified;
+	}
+	
+	private ArrayList<File> toFileArray( File sourceDirectory, String[] includes, String[] excludes ) {
+		Scanner scanner = buildContext.newScanner(sourceDirectory, true);
+		scanner.setIncludes(includes);
+		scanner.setExcludes(excludes);
+		scanner.scan();
+		String[] files = scanner.getIncludedFiles();
+		ArrayList<File> fileArray = new ArrayList<File>();
+		for( String f: files ){
+			fileArray.add( new File( sourceDirectory, f ) );
+		}
+		return fileArray;
+	}
+	
+	private ArrayList<ImageNode> loadImages( ArrayList<File> imageFiles ) throws MojoExecutionException {
 		ArrayList<ImageNode> images = new ArrayList<ImageNode>();
 		for( File f: imageFiles ){
 			images.add( new ImageNode(f) );
@@ -83,7 +188,7 @@ public class Spritepacker {
 		return images;
 	}
 	
-	private static void sortImages( ArrayList<ImageNode> images ){
+	private void sortImages( ArrayList<ImageNode> images ){
 		// Sort by max width / height descending
 		Collections.sort(images, new Comparator<ImageNode>() {
 			@Override
@@ -95,13 +200,13 @@ public class Spritepacker {
 		});
 	}
 	
-	private static Node packImages( ArrayList<ImageNode> images ){
+	private Node packImages( ArrayList<ImageNode> images, Integer padding ){
 		PackGrowing p = new PackGrowing();
 		p.setPadding( padding );
-		return p.fit(images);		
+		return p.fit(images);
 	}
 	
-	private static void saveSpritesheet( ArrayList<ImageNode> images, Node root, File output ){
+	private void saveSpritesheet( ArrayList<ImageNode> images, Node root, File output ) throws MojoExecutionException{
 		BufferedImage spritesheet = new BufferedImage( root.w, root.h, BufferedImage.TYPE_INT_ARGB);
 		Graphics2D gfx = spritesheet.createGraphics();
 		for( ImageNode n: images ){
@@ -109,18 +214,18 @@ public class Spritepacker {
 		}
 
 		if (!output.getParentFile().exists() && !output.getParentFile().mkdirs()) {
-			log("Couldn't create target directory", new Exception("Cannot create output directory " + output.getParentFile()));
+			throw new MojoExecutionException("Couldn't create target directory: " + output.getParentFile());
 		}
 		
 		try {
 			ImageIO.write(spritesheet, "png", output);
 		} catch (IOException e) {
-			log("Couldn't write spritesheet: "+output, e);
+			throw new MojoExecutionException("Couldn't write spritesheet: "+output, e);
 		}
 		
 	}
 	
-	private static void saveJSON( ArrayList<ImageNode> images, File json, String jsonp_variable ){
+	private void saveJSON( ArrayList<ImageNode> images, File json, String jsonp_variable ) throws MojoExecutionException {
 		ObjectMapper mapper = new ObjectMapper();
 		mapper.configure( Feature.INDENT_OUTPUT, true);
 		
@@ -150,7 +255,7 @@ public class Spritepacker {
 		try {
 			out = mapper.writeValueAsString( map );
 		} catch (Exception e) {
-			log("Couldn't generate JSON data", e);
+			throw new MojoExecutionException("Couldn't generate JSON data", e);
 		}
 		
 		// If user has passed in a variable to wrap this in, append it to the front
@@ -164,7 +269,7 @@ public class Spritepacker {
 			fw.write( out );
 			fw.close();
 		} catch (IOException e) {
-			log("Couldn't write JSON: "+json, e);
+			throw new MojoExecutionException("Couldn't write JSON: "+json, e);
 		}
 	}
 	
@@ -179,22 +284,13 @@ public class Spritepacker {
 		}
 	}
 	
-	static float secondsSinceStart(){
+	private float secondsSinceStart(){
 		float tookM = (System.currentTimeMillis() - startTime);
 		return tookM / 1000;
 	}
 	
-	static void log(Object message){
-		writeConsoleMessage( message.toString() );
-	}
-
-	static void log(Object message, Exception e){
-		writeConsoleMessage( message.toString() + "\n" + e );
+	public void log(Object message){
+		getLog().info( message.toString() );
 	}
 	
-	static void writeConsoleMessage( String message ){
-		String t = new SimpleDateFormat( "dd/MM/yy hh:mm:ss").format( System.currentTimeMillis() );
-		System.out.println("[" + t + "] " + message.toString());
-	}
-
 }

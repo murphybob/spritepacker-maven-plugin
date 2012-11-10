@@ -41,3 +41,5 @@ target/*
 bin/*
 .settings/*
 .git/*
+.classpath
+.project

@@ -6,26 +6,28 @@ import java.io.IOException;
 
 import javax.imageio.ImageIO;
 
+import org.apache.maven.plugin.MojoExecutionException;
+
 public class ImageNode {
-	public File filename;
+	public File file;
 	public BufferedImage image;
 	public Node node;
 	public int w;
 	public int h;
 	
-	public ImageNode( File f ){
-		filename = f;
+	public ImageNode( File f ) throws MojoExecutionException {
+		file = f;
 		try {
 			image = ImageIO.read(f);
 		} catch (IOException e) {
-			Spritepacker.log("Failed to open file: " + f.toPath(), e);
+			throw new MojoExecutionException("Failed to open file: " + f.getPath(), e);
 		}
 		w = image.getWidth();
 		h = image.getHeight(); 
 	}
 	
 	public String toString(){
-		return filename.toPath() + "\n" + node;
+		return file.getPath() + "\n" + node;
 	}
 
 }

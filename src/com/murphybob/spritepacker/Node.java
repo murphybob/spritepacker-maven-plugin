@@ -24,7 +24,7 @@ public class Node {
 	}
 	
 	public String toString(){
-		return "X,Y,W,H,U: " + x + "," + y + "," + w + "," + h + "," + used;// + "\n\tDown X,Y,W,H: " + down.x + "," + down.y + "," + down.w + "," + down.h + "\n\tRight X,Y,W,H: " + right.x + "," + right.y + "," + right.w + "," + right.h;
+		return "X,Y,W,H,U: " + x + "," + y + "," + w + "," + h + "," + used;
 	}
-	
+
 }

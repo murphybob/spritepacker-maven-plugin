@@ -1,5 +1,0 @@
-Todo
-
-Implement growing packer algorithm and dynamic sized spritesheet
-Implement padding
-Turn into a mojo

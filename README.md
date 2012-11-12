@@ -39,33 +39,71 @@ Configuration
 =============
 
 <dl>
+
+	<dt>sourceDirectory</dt>
+	<dd>The directory where your source images reside.  This will be scanned recursively and files included based on include/exclude rules.</dd>
+	
+	<dt>includes</dt>
+	<dd>Expression of which files to include.  See [http://plexus.codehaus.org/plexus-utils/apidocs/org/codehaus/plexus/util/DirectoryScanner.html] for more details.</dt>
+	
+	<dt>excludes</dt>
+	<dd>Expression of which files to exclude.  See [http://plexus.codehaus.org/plexus-utils/apidocs/org/codehaus/plexus/util/DirectoryScanner.html] for more details.</dt>
+	
+	<dt>output</dt>
+	<dd>File to write PNG spritesheet to.</dd>
+	
+	<dt>json</dt>
+	<dd>File to write JSON(P) spritesheet meta data to. See below for structure.</dd>
+	
+	<dt>jsonpVar</dt>
+	<dd>If set this is used as a padding variable to make the JSON file into a JSONP file which may be more useful depending on your application. e.g.<br>
+		*{ image: {...} }*<br>
+		becomes<br>
+		*jsonpVar = { image: {...} }*
+	</dd>
+	
+	<dt>padding</dt>
+	<dd>Padding in pixels to be added around each image and the edges of the spritesheet.  Useful if you are having problems with images bleeding into each other due to users zooming, sub-pixel rendering, etc...</dd>
    
-   <dt>sourceDirectory</dt>
-   <dd>The directory where your source images reside.  This will be scanned recursively and files included based on include/exclude rules.</dd>
-   
-   <dt>includes</dt>
-   <dd>Expression of which files to include.  See [http://plexus.codehaus.org/plexus-utils/apidocs/org/codehaus/plexus/util/DirectoryScanner.html] for more details.</dt>
-   
-   <dt>excludes</dt>
-   <dd>Expression of which files to exclude.  See [http://plexus.codehaus.org/plexus-utils/apidocs/org/codehaus/plexus/util/DirectoryScanner.html] for more details.</dt>
-   
-   <dt>output</dt>
-   <dd>File to write PNG spritesheet to.</dd>
-   
-   <dt>json</dt>
-   <dd>File to write JSON(P) spritesheet meta data to.</dd>
-   
-   <dt>jsonpVar</dt>
-   <dd>If set this is used as a padding variable to make the JSON file into a JSONP file which may be more useful depending on your application. e.g.
-       { image: {...} }
-       becomes
-       jsonpVar = { image: {...} }
-   </dd>
-   
-   <dt>padding</dt>
-   <dd>Padding in pixels to be added around each image and the edges of the spritesheet.  Useful if you are having problems with images bleeding into each other due to users zooming, sub-pixel rendering, etc...</dd>
-   
-</dl>   
+</dl>
+
+JSON
+====
+
+The JSON is formatted as in the example below.  At the top level are keys which are derived from the file name of the image, with the extension stripped.  For that reason, if you wish to use this data you must ensure these filenames are unique throughout the entire list of images.
+
+At the next level are the width (*w*), height (*h*), negative x location (*x*), negative y location (*y*), and both x and y in one for convenience (*xy*) as strings with "px" appended for use in a stylesheet.
+
+At that level is also *n* which contains the same keys (apart from *xy*) with the same values as pure integers. 
+
+	{
+		"example" : {
+			"w" : "128px",
+			"n" : {
+				"w" : 128,
+				"h" : 128,
+				"y" : 10,
+				"x" : 398
+			},
+			"h" : "128px",
+			"y" : "-10px",
+			"xy" : "-398px -10px",
+			"x" : "-398px"
+		},
+		"anotherImage" : {
+			"w" : "378px",
+			"n" : {
+				"w" : 378,
+				"h" : 378,
+				"y" : 10,
+				"x" : 10
+			},
+			"h" : "378px",
+			"y" : "-10px",
+			"xy" : "-10px -10px",
+			"x" : "-10px"
+		}
+	}
 
 Notes
 =====

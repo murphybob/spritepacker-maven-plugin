@@ -20,33 +20,33 @@ import org.sonatype.plexus.build.incremental.BuildContext;
 
 import org.apache.maven.plugin.AbstractMojo;
 import org.apache.maven.plugin.MojoExecutionException;
+import org.apache.maven.plugins.annotations.Component;
+import org.apache.maven.plugins.annotations.LifecyclePhase;
+import org.apache.maven.plugins.annotations.Mojo;
+import org.apache.maven.plugins.annotations.Parameter;
 
 
 /**
  * Packs spritesheets from supplied images.
  * 
  * @author Robert Murphy
- * @goal compile
- * @phase process-sources
  */
+@Mojo( name = "compile", defaultPhase = LifecyclePhase.PROCESS_SOURCES )
 public class Spritepacker extends AbstractMojo {
 	
 	private static long startTime = System.currentTimeMillis();
 	
 	/**
 	 * Output spritesheet image name
-	 * 
-	 * @parameter expression="${spritepacker.output}"
-	 * @required
 	 */
-	private static File output;
+    @Parameter( required = true )
+	private File output;
 	
 	/**
 	 * Output json(p) description file containing coords and dimensions.
-	 * 
-	 * @parameter expression="${spritepacker.json}"
 	 */
-	private static File json;
+    @Parameter
+	private File json;
 	
 	/**
 	 * Optional padding variable for jsonp files
@@ -54,41 +54,35 @@ public class Spritepacker extends AbstractMojo {
 	 * { image: {...} }
 	 * becomes
 	 * jsonpVar = { image: {...} }
-	 * 
-	 * @parameter expression="${spritepacker.jsonpVar}"
 	 */
-	private static String jsonpVar;
+    @Parameter
+    private String jsonpVar;
 	
 	/**
 	 * The source directory containing the LESS sources.
-	 * 
-	 * @parameter expression="${spritepacker.sourceDirectory}"
-	 * @required
 	 */
+    @Parameter( required = true )
 	private File sourceDirectory;
 
 	/**
 	 * List of files to include. Specified as fileset patterns which are relative to the source directory. Default is all files.
-	 * 
-	 * @parameter
 	 */
+    @Parameter
 	private String[] includes = new String[]{ "**/*" };
 
 	/**
 	 * List of files to exclude. Specified as fileset patterns which are relative to the source directory.
-	 * 
-	 * @parameter
 	 */
+    @Parameter
 	private String[] excludes = new String[] {};
 	
 	/**
 	 * Optional transparent padding added between images in spritesheet.
-	 * 
-	 * @parameter expression="${spritepacker.padding}" default-value="0"
 	 */
-	private static Integer padding;
+    @Parameter( defaultValue = "0" )
+	private Integer padding;
 
-	/** @component */
+    @Component
 	private BuildContext buildContext;
 
 	/**

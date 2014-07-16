@@ -16,7 +16,7 @@ Include the plugin in your maven project, and use the pom.xml configuration dire
 	<plugin>
 		<groupId>com.murphybob</groupId>
 		<artifactId>spritepacker-maven-plugin</artifactId>
-		<version>0.9</version>
+		<version>0.10.0</version>
 		<configuration>
 			<sourceDirectory>${project.basedir}/src/images/sprites/</sourceDirectory>
 			<includes>
@@ -25,14 +25,14 @@ Include the plugin in your maven project, and use the pom.xml configuration dire
 			<output>${project.build.directory}/images/assets-sprite.png</output>
 			<json>${project.build.directory}/images/assets-sprite.json</json>
 			<padding>10</padding>
-			<executions>
-				<execution>
-					<goals>
-						<goal>compile</goal>
-					</goals>
-				</execution>
-			</executions>
 		</configuration>
+        <executions>
+            <execution>
+                <goals>
+                    <goal>compile</goal>
+                </goals>
+            </execution>
+        </executions>
 	</plugin>
 
 Configuration
